@@ -74,6 +74,10 @@
 #define PADDLE_WIDTH    3
 #define BALL_SIZE       3
 
+#define JOY_CENTER      512
+#define JOY_DEADZONE    80
+#define PADDLE_SPEED    2
+
 #define OLED_WIDTH      128
 #define OLED_HEIGHT     64
 #define NOKIA_WIDTH     84
@@ -236,18 +240,7 @@ ISR(TIMER2_COMP_vect)
 
 static uint8_t framebuffer[LCD_W * LCD_PAGES];
 
-static const uint8_t font5x7[][5] = {
-    {0x3E,0x51,0x49,0x45,0x3E}, /* 0 */
-    {0x00,0x42,0x7F,0x40,0x00}, /* 1 */
-    {0x42,0x61,0x51,0x49,0x46}, /* 2 */
-    {0x21,0x41,0x45,0x4B,0x31}, /* 3 */
-    {0x18,0x14,0x12,0x7F,0x10}, /* 4 */
-    {0x27,0x45,0x45,0x45,0x39}, /* 5 */
-    {0x3C,0x4A,0x49,0x49,0x30}, /* 6 */
-    {0x01,0x71,0x09,0x05,0x03}, /* 7 */
-    {0x36,0x49,0x49,0x49,0x36}, /* 8 */
-    {0x06,0x49,0x49,0x29,0x1E}, /* 9 */
-};
+/* Font usuniety — wynik wyswietlany tylko na 7-segmentowym */
 
 static void spi_write(uint8_t byte)
 {
@@ -334,16 +327,7 @@ static void pcd8544_fill_rect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_
             pcd8544_pixel(x + dx, y + dy, on);
 }
 
-static void pcd8544_draw_char(uint8_t x, uint8_t page, char c)
-{
-    if (c < '0' || c > '9')
-        return;
-    const uint8_t *glyph = font5x7[c - '0'];
-    for (uint8_t col = 0; col < 5; col++) {
-        if (x + col < LCD_W && page < LCD_PAGES)
-            framebuffer[(uint16_t)page * LCD_W + x + col] = glyph[col];
-    }
-}
+/* draw_char usuniety — wynik tylko na 7-seg */
 
 /* =============================================================================
  *  LOGIKA GRY — Board 2 (prawa polowa boiska, gracz 2)
@@ -398,7 +382,17 @@ static void game_init(void)
 static void update_paddle(void)
 {
     uint16_t raw = adc_read(JOY_Y_CHANNEL);
-    my_paddle.y = (int8_t)((uint32_t)raw * (SCREEN_H - PAD_H) / 1023);
+    int16_t offset = (int16_t)raw - JOY_CENTER;
+
+    if (offset > JOY_DEADZONE)
+        my_paddle.y += PADDLE_SPEED;
+    else if (offset < -JOY_DEADZONE)
+        my_paddle.y -= PADDLE_SPEED;
+
+    if (my_paddle.y < 0)
+        my_paddle.y = 0;
+    if (my_paddle.y > SCREEN_H - PAD_H)
+        my_paddle.y = SCREEN_H - PAD_H;
 }
 
 static void update_ball(void)
@@ -499,10 +493,6 @@ static void render(void)
     /* Pilka */
     if (ball_active)
         pcd8544_fill_rect(ball.x, ball.y, B_SIZE, B_SIZE, 1);
-
-    /* Wynik */
-    pcd8544_draw_char(30, 0, '0' + (score_p1 % 10));
-    pcd8544_draw_char(50, 0, '0' + (score_p2 % 10));
 
     pcd8544_update();
 }
