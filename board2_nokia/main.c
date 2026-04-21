@@ -29,12 +29,12 @@
  *
  *  W Microchip Studio:
  *    1. File -> New -> Project -> GCC C Executable Project
- *    2. Wybierz uklad: ATmega32
+ *    2. Wybierz uklad: ATmega32A
  *    3. Wklej cala zawartosc tego pliku do main.c
  *    4. Project -> Properties -> Toolchain -> AVR/GNU C Compiler -> Symbols
  *       -> Dodaj: F_CPU=16000000UL
  *    5. Build -> Build Solution (F7)
- *    6. Wgraj przez USBasp (Tools -> External Tools lub avrdude)
+ *    6. Tools -> Device Programming -> wybierz ATmega32A -> wgraj
  *
  *  UWAGA dotyczaca napiecia:
  *    Nokia 5110 pracuje na 3.3V. Jesli ATmega32 jest zasilana z 5V,

@@ -8,14 +8,14 @@ ATB 1.05a z mikrokontrolerem ATmega32 @ 16 MHz.
 Dla **każdej makiety** osobny projekt:
 
 1. **File → New → Project → GCC C Executable Project**
-2. Podaj nazwę (np. `Pong_Board1`) i wybierz układ: **ATmega32**
+2. Podaj nazwę (np. `Pong_Board1`) i wybierz układ: **ATmega32A**
 3. Otwórz wygenerowany `main.c` i **zastąp całą jego zawartość** treścią odpowiedniego pliku:
    - Makieta 1: `board1_oled/main.c`
    - Makieta 2: `board2_nokia/main.c`
 4. **Project → Properties → Toolchain → AVR/GNU C Compiler → Symbols**
    → kliknij `+` i dodaj: `F_CPU=16000000UL`
 5. **Build → Build Solution** (F7)
-6. Wgraj HEX na układ przez USBasp (lub inne narzędzie)
+6. **Tools → Device Programming** → wybierz **ATmega32A** → wgraj
 
 Żadnych dodatkowych plików ani headerów nie trzeba dodawać — wszystko jest w jednym `main.c`.
 
@@ -217,44 +217,23 @@ Identycznie jak na Makiecie 1 — wbudowany, obsługiwany przez Timer2.
 
 ---
 
-## Kompilacja
+## Kompilacja i wgrywanie (Microchip Studio)
 
-Wymagany toolchain: **avr-gcc**, **avr-libc**, **avrdude**.
+Wszystko odbywa się w Microchip Studio — nie potrzebujesz avrdude, USBasp ani wiersza poleceń.
 
-```bash
-# Board 1 (OLED)
-cd board1_oled
-make clean && make
+1. **Build → Build Solution** (F7) — kompilacja
+2. **Tools → Device Programming** → wybierz swój programator i układ **ATmega32A** → Flash → wgraj
 
-# Board 2 (Nokia 5110)
-cd board2_nokia
-make clean && make
-```
-
-## Programowanie (flash)
-
-Za pomocą wbudowanego programatora USBasp na ATB 1.05a:
-
-```bash
-# Board 1
-cd board1_oled
-make flash
-
-# Board 2
-cd board2_nokia
-make flash
-```
+Powtórz dla drugiej makiety (osobny projekt).
 
 ## Fusebity
 
-ATmega32 na ATB 1.05a powinien mieć ustawione:
+ATmega32A na ATB 1.05a powinien mieć ustawione:
 - Kwarc zewnętrzny 16 MHz (CKSEL = 1111, SUT = 11)
 - **JTAG wyłączony** (JTAGEN = 1, czyli unprogrammed) — zwalnia piny PC2..PC5
 - Domyślne ustawienia ATB 1.05a powinny być odpowiednie
 
-```bash
-avrdude -c usbasp -p m32 -U lfuse:w:0xFF:m -U hfuse:w:0xD9:m
-```
+Fusebity można ustawić w **Tools → Device Programming → Fuses**.
 
 ---
 
