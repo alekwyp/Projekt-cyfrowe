@@ -1,4 +1,4 @@
-# Board 1 — OLED SSD1306 (I2C)
+# Board 1 — OLED SSD1306 (I2C) — jeden plik main.c
 # ATmega32, 16 MHz
 
 MCU      = atmega32
@@ -15,20 +15,15 @@ CFLAGS  += -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums
 
 LDFLAGS  = -mmcu=$(MCU)
 
-SRC  = main.c i2c.c ssd1306.c
-SRC += ../common/uart.c ../common/adc.c ../common/seg7.c
-
-OBJ  = $(SRC:.c=.o)
-
 all: $(TARGET).hex size
 
-$(TARGET).elf: $(OBJ)
+$(TARGET).elf: main.o
 	$(CC) $(LDFLAGS) -o $@ $^
 
 $(TARGET).hex: $(TARGET).elf
 	$(OBJCOPY) -O ihex -R .eeprom $< $@
 
-%.o: %.c
+main.o: main.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 size: $(TARGET).elf
@@ -38,6 +33,6 @@ flash: $(TARGET).hex
 	$(AVRDUDE) -c usbasp -p m32 -U flash:w:$<:i
 
 clean:
-	rm -f $(OBJ) $(TARGET).elf $(TARGET).hex
+	rm -f main.o $(TARGET).elf $(TARGET).hex
 
 .PHONY: all size flash clean

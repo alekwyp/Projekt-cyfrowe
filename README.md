@@ -3,6 +3,24 @@
 Dwuosobowa gra Pong, w której wirtualne boisko jest podzielone na dwie współpracujące makiety
 ATB 1.05a z mikrokontrolerem ATmega32 @ 16 MHz.
 
+## Jak wgrać w Microchip Studio
+
+Dla **każdej makiety** osobny projekt:
+
+1. **File → New → Project → GCC C Executable Project**
+2. Podaj nazwę (np. `Pong_Board1`) i wybierz układ: **ATmega32**
+3. Otwórz wygenerowany `main.c` i **zastąp całą jego zawartość** treścią odpowiedniego pliku:
+   - Makieta 1: `board1_oled/main.c`
+   - Makieta 2: `board2_nokia/main.c`
+4. **Project → Properties → Toolchain → AVR/GNU C Compiler → Symbols**
+   → kliknij `+` i dodaj: `F_CPU=16000000UL`
+5. **Build → Build Solution** (F7)
+6. Wgraj HEX na układ przez USBasp (lub inne narzędzie)
+
+Żadnych dodatkowych plików ani headerów nie trzeba dodawać — wszystko jest w jednym `main.c`.
+
+---
+
 ## Architektura systemu
 
 ```
@@ -29,25 +47,19 @@ a Board 2 przejmuje renderowanie. Analogicznie w drugą stronę.
 ## Struktura plików
 
 ```
-├── common/             Wspólne moduły obu makiet
-│   ├── protocol.h      Definicje protokołu UART (ramki, stałe gry)
-│   ├── uart.h / uart.c Driver UART + ISR odbioru
-│   ├── adc.h / adc.c   Driver ADC (joystick)
-│   └── seg7.h / seg7.c Driver wyświetlacza 7-seg (multipleksowanie Timer2)
-│
-├── board1_oled/        Makieta 1 — ekran OLED SSD1306 128×64 (I2C)
-│   ├── i2c.h / i2c.c   Driver sprzętowego TWI (I2C)
-│   ├── ssd1306.h/.c    Driver OLED SSD1306 z framebufferem
-│   ├── main.c          Główna pętla gry Board 1
+├── board1_oled/
+│   ├── main.c          CAŁY KOD MAKIETY 1 — jeden plik (UART, ADC, 7-seg, I2C, SSD1306, gra)
 │   └── Makefile
 │
-├── board2_nokia/       Makieta 2 — ekran Nokia 5110 PCD8544 84×48 (SPI)
-│   ├── pcd8544.h/.c    Driver Nokia 5110 (PCD8544) z framebufferem
-│   ├── main.c          Główna pętla gry Board 2
+├── board2_nokia/
+│   ├── main.c          CAŁY KOD MAKIETY 2 — jeden plik (UART, ADC, 7-seg, SPI, PCD8544, gra)
 │   └── Makefile
 │
 └── README.md           Ten plik
 ```
+
+**Każda makieta to JEDEN plik `main.c`** — wystarczy wkleić go do projektu
+w Microchip Studio. Nie trzeba dodawać żadnych dodatkowych plików.
 
 ---
 
